@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="en" style="color-scheme: dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Niche — Every Lead. Every Time. Until It's Booked.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              background: '#09090b',
+              foreground: '#fafafa',
+              muted: { DEFAULT: '#27272a', foreground: '#a1a1aa' },
+              border: '#27272a',
+              primary: { DEFAULT: '#fafafa', foreground: '#09090b' },
+            },
+          },
+        },
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        background: #09090b;
+        color: #fafafa;
+      }
+      .anim-scene {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+      .anim-scale {
+        width: 900px;
+        height: 640px;
+        transform-origin: top left;
+        position: relative;
+      }
+      .anim-ambient {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 320px;
+        height: 320px;
+        transform: translate(-50%, -50%);
+        background: radial-gradient(
+          circle,
+          rgba(124, 58, 237, 0.06) 0%,
+          rgba(59, 130, 246, 0.03) 40%,
+          transparent 70%
+        );
+        border-radius: 50%;
+        pointer-events: none;
+        filter: blur(20px);
+      }
+      .anim-tile {
+        position: absolute;
+        width: 64px;
+        height: 64px;
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        backdrop-filter: blur(8px);
+        transition:
+          transform 0.3s ease,
+          border-color 0.3s ease;
+      }
+      .anim-tile:hover {
+        transform: scale(1.1);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+      .anim-tile img {
+        width: 36px;
+        height: 36px;
+        object-fit: contain;
+        border-radius: 4px;
+      }
+      .anim-tile svg {
+        width: 30px;
+        height: 30px;
+      }
+      .anim-hub {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 80px;
+        height: 80px;
+        transform: translate(-50%, -50%);
+        border-radius: 18px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+        z-index: 10;
+      }
+      .anim-hub img {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+      }
+      .anim-paths {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .anim-paths path {
+        fill: none;
+        stroke-width: 1.5;
+      }
+
+      /* Chat animation */
+      @keyframes fadeSlideUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .chat-msg {
+        opacity: 0;
+        animation: fadeSlideUp 0.4s ease forwards;
+      }
+      .chat-typing span {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #52525b;
+        animation: typingDot 1.4s infinite;
+      }
+      .chat-typing span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .chat-typing span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes typingDot {
+        0%,
+        60%,
+        100% {
+          opacity: 0.3;
+          transform: translateY(0);
+        }
+        30% {
+          opacity: 1;
+          transform: translateY(-4px);
+        }
+      }
+    </style>
+    <script>
+      // Scale the animation SVG to fit its container
+      function scaleAnim() {
+        const scene = document.querySelector('.anim-scene')
+        const inner = document.querySelector('.anim-scale')
+        if (!scene || !inner) return
+        const s = Math.min(scene.offsetWidth / 900, scene.offsetHeight / 640)
+        inner.style.transform = 'scale(' + s + ')'
+      }
+      window.addEventListener('resize', scaleAnim)
+      window.addEventListener('load', scaleAnim)
+
+      // Chat animation sequence
+      function runChat() {
+        const box = document.getElementById('chat-anim')
+        if (!box) return
+        const msgs = [
+          {
+            role: 'customer',
+            text: 'Hi, I need a plumber for a leaky faucet. Available this week?',
+            delay: 800,
+          },
+          { role: 'typing', delay: 1400 },
+          {
+            role: 'bot',
+            text: "Hi! We'd love to help with that. Is this for your home or a commercial property?",
+            delay: 1800,
+          },
+          {
+            role: 'customer',
+            text: "It's my home, kitchen faucet has been dripping for a few days.",
+            delay: 3200,
+          },
+          { role: 'typing', delay: 1200 },
+          {
+            role: 'bot',
+            text: 'Got it — kitchen faucet drip. We have openings Tuesday and Thursday this week. Could I get your phone number so we can confirm a time?',
+            delay: 2000,
+          },
+          { role: 'customer', text: '(555) 867-5309', delay: 3000 },
+          { role: 'typing', delay: 1000 },
+          {
+            role: 'bot',
+            text: "Perfect, thanks! We'll call you shortly to lock in your appointment. Talk soon!",
+            delay: 1600,
+          },
+        ]
+        let i = 0
+        function next() {
+          if (i >= msgs.length) return
+          const m = msgs[i]
+          setTimeout(() => {
+            // Remove typing indicator if present
+            const typ = box.querySelector('.chat-typing-wrap')
+            if (typ) typ.remove()
+            if (m.role === 'typing') {
+              const d = document.createElement('div')
+              d.className = 'chat-typing-wrap self-start flex gap-1.5 px-4 py-3 chat-msg'
+              d.style.animationDelay = '0s'
+              d.innerHTML = '<div class="chat-typing"><span></span><span></span><span></span></div>'
+              box.appendChild(d)
+            } else {
+              const d = document.createElement('div')
+              const isCustomer = m.role === 'customer'
+              d.className =
+                'chat-msg max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ' +
+                (isCustomer
+                  ? 'self-end rounded-br-md bg-[#27272a] text-[#fafafa]'
+                  : 'self-start rounded-bl-md bg-[#18181b] border border-[#27272a] text-[#a1a1aa]')
+              d.style.animationDelay = '0s'
+              d.textContent = m.text
+              box.appendChild(d)
+            }
+            box.scrollTop = box.scrollHeight
+            i++
+            next()
+          }, m.delay)
+        }
+        next()
+      }
+      window.addEventListener('load', runChat)
+
+      function fillPrompt(btn) {
+        const ta = document.getElementById('hero-prompt')
+        if (ta) {
+          ta.value = btn.textContent.trim()
+          ta.focus()
+        }
+      }
+      function submitPrompt() {
+        const ta = document.getElementById('hero-prompt')
+        const text = ta?.value?.trim()
+        if (!text) return
+        window.location.href =
+          'https://app.nicheandleads.com/workflows/new?prompt=' + encodeURIComponent(text)
+      }
+    </script>
+  </head>
+  <body class="dark">
+    <div class="flex min-h-screen flex-col bg-[#09090b] antialiased">
+      <!-- HEADER -->
+      <header
+        class="sticky top-0 z-50 w-full border-b border-[#27272a] bg-[#09090b]/80 backdrop-blur-md"
+      >
+        <nav
+          class="relative mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8"
+        >
+          <div class="flex items-center gap-6 lg:gap-8">
+            <a href="/" class="flex items-center gap-2">
+              <img src="animation-assets/favicon.ico" alt="Niche" class="h-8 w-8 rounded-md" />
+              <span class="text-sm font-semibold tracking-tight text-[#fafafa]">Niche</span>
+            </a>
+            <div class="hidden md:absolute md:left-1/2 md:flex md:-translate-x-1/2 md:gap-x-1">
+              <a
+                href="#features"
+                class="rounded-md px-3 py-1.5 text-sm font-medium text-[#a1a1aa] transition-colors hover:text-[#fafafa] hover:bg-[#27272a]/50"
+                >Features</a
+              >
+              <a
+                href="#integrations"
+                class="rounded-md px-3 py-1.5 text-sm font-medium text-[#a1a1aa] transition-colors hover:text-[#fafafa] hover:bg-[#27272a]/50"
+                >Integrations</a
+              >
+            </div>
+          </div>
+          <div class="hidden md:flex md:items-center md:gap-x-2">
+            <a
+              href="https://app.nicheandleads.com"
+              class="rounded-md px-3 py-1.5 text-sm font-medium text-[#a1a1aa] transition-colors hover:text-[#fafafa]"
+              >Sign In</a
+            >
+            <a
+              href="https://app.nicheandleads.com"
+              class="inline-flex items-center justify-center rounded-md bg-[#fafafa] px-4 py-2 text-sm font-medium text-[#09090b] transition-colors hover:bg-[#e4e4e7]"
+              >Book Demo</a
+            >
+          </div>
+        </nav>
+      </header>
+
+      <main class="flex-1">
+        <div class="relative">
+          <!-- HERO -->
+          <section class="relative">
+            <div class="mx-auto max-w-7xl border-x border-[#27272a]">
+              <div class="px-8 py-20 lg:px-12 lg:py-28">
+                <div class="text-center max-w-4xl mx-auto">
+                  <h1
+                    class="mt-6 text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-none text-balance text-[#fafafa]"
+                  >
+                    Every Lead. Every Time.
+                    <span class="text-[#a1a1aa]">Until It's Booked.</span>
+                  </h1>
+                  <p class="mt-8 max-w-2xl mx-auto text-lg text-[#a1a1aa] leading-relaxed">
+                    Niche doesn't stop at the first reply. It follows up across calls, texts, and
+                    emails until the job is booked or the lead drops.
+                  </p>
+                  <div class="mt-10 max-w-xl mx-auto w-full">
+                    <div class="rounded-2xl border border-[#27272a] bg-[#18181b] p-4">
+                      <textarea
+                        id="hero-prompt"
+                        placeholder="Describe your workflow..."
+                        rows="3"
+                        class="w-full resize-none bg-transparent text-sm text-[#fafafa] placeholder-[#52525b] outline-none"
+                      ></textarea>
+                      <div class="flex justify-end mt-1">
+                        <button
+                          onclick="submitPrompt()"
+                          class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#27272a] text-[#a1a1aa] transition-colors hover:bg-[#3f3f46] hover:text-[#fafafa]"
+                        >
+                          <svg
+                            class="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              d="M5 12h14m-7-7 7 7-7 7"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="mt-3 flex flex-wrap justify-center gap-2">
+                      <button
+                        onclick="fillPrompt(this)"
+                        class="rounded-full border border-[#27272a] bg-transparent px-3.5 py-1.5 text-xs text-[#a1a1aa] transition-colors hover:border-[#3f3f46] hover:text-[#fafafa]"
+                      >
+                        Qualify Yelp leads and book appointments
+                      </button>
+                      <button
+                        onclick="fillPrompt(this)"
+                        class="rounded-full border border-[#27272a] bg-transparent px-3.5 py-1.5 text-xs text-[#a1a1aa] transition-colors hover:border-[#3f3f46] hover:text-[#fafafa]"
+                      >
+                        Follow up after missed calls
+                      </button>
+                      <button
+                        onclick="fillPrompt(this)"
+                        class="rounded-full border border-[#27272a] bg-transparent px-3.5 py-1.5 text-xs text-[#a1a1aa] transition-colors hover:border-[#3f3f46] hover:text-[#fafafa]"
+                      >
+                        Text new leads and notify the team
+                      </button>
+                      <button
+                        onclick="fillPrompt(this)"
+                        class="rounded-full border border-[#27272a] bg-transparent px-3.5 py-1.5 text-xs text-[#a1a1aa] transition-colors hover:border-[#3f3f46] hover:text-[#fafafa]"
+                      >
+                        Route website form leads by service type
+                      </button>
+                    </div>
+                  </div>
+                  <div class="mt-16 flex flex-wrap justify-center gap-x-12 gap-y-4">
+                    <div>
+                      <span class="text-2xl font-bold text-[#fafafa]">&lt; 2 sec</span>
+                      <p class="text-xs text-[#a1a1aa] mt-1">Response time</p>
+                    </div>
+                    <div>
+                      <span class="text-2xl font-bold text-[#fafafa]">85%</span>
+                      <p class="text-xs text-[#a1a1aa] mt-1">Booking rate</p>
+                    </div>
+                    <div>
+                      <span class="text-2xl font-bold text-[#fafafa]">$50M+</span>
+                      <p class="text-xs text-[#a1a1aa] mt-1">Revenue generated</p>
+                    </div>
+                    <div>
+                      <span class="text-2xl font-bold text-[#fafafa]">24/7</span>
+                      <p class="text-xs text-[#a1a1aa] mt-1">No days off</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- TWO-COLUMN: ANIMATION + CHAT MOCK -->
+          <section id="integrations" class="border-t border-[#27272a]">
+            <div class="mx-auto max-w-7xl border-x border-[#27272a]">
+              <div class="grid grid-cols-1 lg:grid-cols-2">
+                <div
+                  class="relative border-b border-[#27272a] lg:border-b-0 lg:border-r p-8 lg:p-12 flex flex-col justify-between"
+                >
+                  <div>
+                    <h2 class="text-2xl font-semibold tracking-tight text-[#fafafa]">
+                      Connects to everything.
+                    </h2>
+                    <p class="mt-2 text-sm text-[#a1a1aa] max-w-md">
+                      Leads flow in from Yelp, Google LSA, Thumbtack, and voice — straight to your
+                      CRMs and tools.
+                    </p>
+                  </div>
+                  <div class="anim-scene mt-6 overflow-hidden" style="aspect-ratio: 900/640">
+                    <div class="anim-scale">
+                      <div class="anim-ambient"></div>
+                      <svg
+                        class="anim-paths"
+                        viewBox="0 0 900 640"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          style="stroke: rgba(239, 68, 68, 0.4)"
+                          d="M 132,100 C 280,100 320,320 410,320"
+                        />
+                        <path
+                          style="stroke: rgba(96, 165, 250, 0.4)"
+                          d="M 132,240 C 270,240 340,320 410,320"
+                        />
+                        <path
+                          style="stroke: rgba(34, 211, 238, 0.4)"
+                          d="M 132,380 C 270,380 340,320 410,320"
+                        />
+                        <path
+                          style="stroke: rgba(167, 139, 250, 0.4)"
+                          d="M 132,520 C 280,520 320,320 410,320"
+                        />
+                        <path
+                          style="stroke: rgba(56, 189, 248, 0.35)"
+                          d="M 490,320 C 580,320 620,100 768,100"
+                        />
+                        <path
+                          style="stroke: rgba(251, 191, 36, 0.35)"
+                          d="M 490,320 C 580,320 640,240 768,240"
+                        />
+                        <path
+                          style="stroke: rgba(52, 211, 153, 0.35)"
+                          d="M 490,320 C 580,320 640,380 768,380"
+                        />
+                        <path
+                          style="stroke: rgba(96, 165, 250, 0.35)"
+                          d="M 490,320 C 580,320 620,520 768,520"
+                        />
+                      </svg>
+                      <div class="anim-tile" style="left: 68px; top: 68px">
+                        <img src="animation-assets/yelp-logo.png" alt="" />
+                      </div>
+                      <div class="anim-tile" style="left: 68px; top: 208px">
+                        <img src="animation-assets/google-lsa-logo.svg" alt="" />
+                      </div>
+                      <div class="anim-tile" style="left: 68px; top: 348px">
+                        <img src="animation-assets/thumbtack-logo.png" alt="" />
+                      </div>
+                      <div class="anim-tile" style="left: 68px; top: 488px">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#8b5cf6"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path
+                            d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"
+                          />
+                        </svg>
+                      </div>
+                      <div class="anim-hub"><img src="animation-assets/favicon.ico" alt="" /></div>
+                      <div class="anim-tile" style="right: 68px; top: 68px">
+                        <img src="animation-assets/acculynx.avif" alt="" />
+                      </div>
+                      <div class="anim-tile" style="right: 68px; top: 208px">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="#fbbf24"
+                          stroke-width="1.8"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <circle cx="12" cy="12" r="5" />
+                          <line x1="12" y1="1" x2="12" y2="3" />
+                          <line x1="12" y1="21" x2="12" y2="23" />
+                          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                          <line x1="1" y1="12" x2="3" y2="12" />
+                          <line x1="21" y1="12" x2="23" y2="12" />
+                          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </svg>
+                      </div>
+                      <div class="anim-tile" style="right: 68px; top: 348px">
+                        <img src="animation-assets/go-high-level.png" alt="" />
+                      </div>
+                      <div class="anim-tile" style="right: 68px; top: 488px">
+                        <img src="animation-assets/google-calendar-logo.png" alt="" />
+                      </div>
+                    </div>
+                    <!-- end anim-scale -->
+                  </div>
+                </div>
+                <div class="relative p-8 lg:p-12 bg-[#27272a]/30 flex flex-col">
+                  <div class="mb-6">
+                    <h2 class="text-2xl font-semibold tracking-tight text-[#fafafa]">
+                      Responds in under 2 seconds.
+                    </h2>
+                    <p class="mt-2 text-sm text-[#a1a1aa] max-w-md">
+                      Niche replies in the native chat instantly — so the conversation starts while
+                      the lead is still ready to book.
+                    </p>
+                  </div>
+                  <div id="chat-anim" class="flex-1 flex flex-col gap-3 overflow-hidden"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- FEATURE GRID — 6 cards -->
+          <section id="features" class="border-t border-[#27272a]">
+            <div class="mx-auto max-w-7xl border-x border-[#27272a]">
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-[#27272a]">
+                <div
+                  class="relative bg-[#09090b] p-8 lg:p-10 min-h-[260px] flex flex-col justify-between"
+                >
+                  <div>
+                    <div
+                      class="flex h-10 w-10 items-center justify-center rounded-md border border-[#27272a] bg-[#09090b]"
+                    >
+                      <svg
+                        class="h-5 w-5 text-[#fafafa]"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]">
+                      Multi-Channel Follow-Up
+                    </h3>
+                    <p class="mt-2 text-sm text-[#a1a1aa] leading-relaxed">
+                      Follows up across voice, SMS, and email — branching and retrying until the job
+                      is booked.
+                    </p>
+                  </div>
+                  <div class="mt-6 flex flex-wrap gap-1.5">
+                    <span
+                      class="inline-flex items-center rounded-md border border-[#27272a] bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#fafafa]"
+                      >Voice</span
+                    >
+                    <span
+                      class="inline-flex items-center rounded-md border border-[#27272a] bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#fafafa]"
+                      >SMS</span
+                    >
+                    <span
+                      class="inline-flex items-center rounded-md border border-[#27272a] bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#fafafa]"
+                      >Email</span
+                    >
+                  </div>
+                </div>
+                <div
+                  class="relative bg-[#09090b] p-8 lg:p-10 min-h-[260px] flex flex-col justify-between"
+                >
+                  <div>
+                    <div
+                      class="flex h-10 w-10 items-center justify-center rounded-md border border-[#27272a] bg-[#09090b]"
+                    >
+                      <svg
+                        class="h-5 w-5 text-[#fafafa]"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456Z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]">
+                      AI-Powered Workflows
+                    </h3>
+                    <p class="mt-2 text-sm text-[#a1a1aa] leading-relaxed">
+                      Describe what you want in plain English. Niche builds the automation —
+                      classify, route, schedule.
+                    </p>
+                  </div>
+                  <div class="mt-6">
+                    <span
+                      class="inline-flex w-fit rounded-md bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#a1a1aa]"
+                      >// describe it, deploy it</span
+                    >
+                  </div>
+                </div>
+                <div
+                  class="relative bg-[#09090b] p-8 lg:p-10 min-h-[260px] flex flex-col justify-between"
+                >
+                  <div>
+                    <div
+                      class="flex h-10 w-10 items-center justify-center rounded-md border border-[#27272a] bg-[#09090b]"
+                    >
+                      <svg
+                        class="h-5 w-5 text-[#fafafa]"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"
+                        />
+                      </svg>
+                    </div>
+                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]">
+                      CRM &amp; Calendar Sync
+                    </h3>
+                    <p class="mt-2 text-sm text-[#a1a1aa] leading-relaxed">
+                      Every lead lands in your CRM automatically. Appointments sync to your
+                      calendar. You just show up.
+                    </p>
+                  </div>
+                  <div class="mt-6 flex flex-wrap gap-1.5">
+                    <span
+                      class="inline-flex items-center rounded-md border border-[#27272a] bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#fafafa]"
+                      >AccuLynx</span
+                    >
+                    <span
+                      class="inline-flex items-center rounded-md border border-[#27272a] bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#fafafa]"
+                      >Sunbase</span
+                    >
+                    <span
+                      class="inline-flex items-center rounded-md border border-[#27272a] bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#fafafa]"
+                      >GoHighLevel</span
+                    >
+                    <span
+                      class="inline-flex items-center rounded-md border border-[#27272a] bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#fafafa]"
+                      >+ more</span
+                    >
+                  </div>
+                </div>
+                <div
+                  class="relative bg-[#09090b] p-8 lg:p-10 min-h-[260px] flex flex-col justify-between"
+                >
+                  <div>
+                    <div
+                      class="flex h-10 w-10 items-center justify-center rounded-md border border-[#27272a] bg-[#09090b]"
+                    >
+                      <svg
+                        class="h-5 w-5 text-[#fafafa]"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3Z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]">
+                      Smart Lead Qualification
+                    </h3>
+                    <p class="mt-2 text-sm text-[#a1a1aa] leading-relaxed">
+                      AI classifies whether a lead matches your services. Out-of-scope requests get
+                      a polite decline.
+                    </p>
+                  </div>
+                  <div class="mt-6 flex flex-wrap gap-1.5">
+                    <span
+                      class="inline-flex items-center rounded-md border border-[#27272a] bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#fafafa]"
+                      >Classify</span
+                    >
+                    <span
+                      class="inline-flex items-center rounded-md border border-[#27272a] bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#fafafa]"
+                      >Route</span
+                    >
+                    <span
+                      class="inline-flex items-center rounded-md border border-[#27272a] bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#fafafa]"
+                      >Decline</span
+                    >
+                  </div>
+                </div>
+                <div
+                  class="relative bg-[#09090b] p-8 lg:p-10 min-h-[260px] flex flex-col justify-between"
+                >
+                  <div>
+                    <div
+                      class="flex h-10 w-10 items-center justify-center rounded-md border border-[#27272a] bg-[#09090b]"
+                    >
+                      <svg
+                        class="h-5 w-5 text-[#fafafa]"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M21.752 15.002A9.72 9.72 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998Z"
+                        />
+                      </svg>
+                    </div>
+                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]">
+                      After-Hours Coverage
+                    </h3>
+                    <p class="mt-2 text-sm text-[#a1a1aa] leading-relaxed">
+                      Lead calls at 8 PM? Niche answers, texts, and books the job — while you sleep.
+                    </p>
+                  </div>
+                  <div class="mt-6">
+                    <span
+                      class="inline-flex w-fit rounded-md bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#a1a1aa]"
+                      >24/7 · No days off</span
+                    >
+                  </div>
+                </div>
+                <div
+                  class="relative bg-[#09090b] p-8 lg:p-10 min-h-[260px] flex flex-col justify-between"
+                >
+                  <div>
+                    <div
+                      class="flex h-10 w-10 items-center justify-center rounded-md border border-[#27272a] bg-[#09090b]"
+                    >
+                      <svg
+                        class="h-5 w-5 text-[#fafafa]"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M11.42 15.17 17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437"
+                        />
+                      </svg>
+                    </div>
+                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]">
+                      Built for Service Businesses
+                    </h3>
+                    <p class="mt-2 text-sm text-[#a1a1aa] leading-relaxed">
+                      Plumbers, roofers, HVAC, electricians, pest control — purpose-built for the
+                      trades.
+                    </p>
+                  </div>
+                  <div class="mt-6 flex flex-wrap gap-1.5">
+                    <span
+                      class="inline-flex items-center rounded-md border border-[#27272a] bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#fafafa]"
+                      >4,500+ businesses</span
+                    >
+                    <span
+                      class="inline-flex items-center rounded-md border border-[#27272a] bg-[#27272a] px-2.5 py-1 font-mono text-xs text-[#fafafa]"
+                      >$50M+ revenue</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- FINAL CTA -->
+          <section class="border-t border-[#27272a]">
+            <div
+              class="mx-auto max-w-7xl border-x border-[#27272a] px-8 py-24 lg:px-12 lg:py-32 text-center"
+            >
+              <h2 class="text-4xl lg:text-6xl font-bold tracking-tight text-balance text-[#fafafa]">
+                Stop losing jobs to<br /><span class="text-[#a1a1aa]">faster competitors.</span>
+              </h2>
+              <div class="mt-10 flex items-center justify-center gap-3">
+                <a
+                  href="https://app.nicheandleads.com"
+                  class="inline-flex items-center gap-2 rounded-md bg-[#fafafa] px-6 py-3 text-sm font-medium text-[#09090b] transition-colors hover:bg-[#e4e4e7]"
+                >
+                  Start Free Trial
+                  <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M5 12h14m-7-7 7 7-7 7"
+                    />
+                  </svg>
+                </a>
+                <a
+                  href="https://app.nicheandleads.com"
+                  class="inline-flex items-center rounded-md border border-[#27272a] bg-transparent px-6 py-3 text-sm font-medium text-[#fafafa] transition-colors hover:bg-[#27272a]/50"
+                  >Book Demo</a
+                >
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="border-t border-[#27272a] bg-[#09090b]">
+        <div class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+          <div class="mx-auto grid max-w-3xl grid-cols-1 gap-8 text-center sm:grid-cols-3">
+            <div>
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-[#a1a1aa]">Product</h3>
+              <ul class="mt-4 space-y-3">
+                <li>
+                  <a
+                    href="#features"
+                    class="text-sm text-[#fafafa]/80 hover:text-[#fafafa] transition-colors"
+                    >Features</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="#integrations"
+                    class="text-sm text-[#fafafa]/80 hover:text-[#fafafa] transition-colors"
+                    >Integrations</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-[#a1a1aa]">Company</h3>
+              <ul class="mt-4 space-y-3">
+                <li>
+                  <a
+                    href="mailto:support@nicheandleads.com"
+                    class="text-sm text-[#fafafa]/80 hover:text-[#fafafa] transition-colors"
+                    >Contact</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="tel:7026088889"
+                    class="text-sm text-[#fafafa]/80 hover:text-[#fafafa] transition-colors"
+                    >(702) 608-8889</a
+                  >
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-[#a1a1aa]">Legal</h3>
+              <ul class="mt-4 space-y-3">
+                <li>
+                  <a
+                    href="#"
+                    class="text-sm text-[#fafafa]/80 hover:text-[#fafafa] transition-colors"
+                    >Privacy</a
+                  >
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    class="text-sm text-[#fafafa]/80 hover:text-[#fafafa] transition-colors"
+                    >Terms</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div
+            class="mt-16 border-t border-[#27272a] pt-8 flex flex-col md:flex-row justify-between items-center gap-4"
+          >
+            <p class="text-xs text-[#a1a1aa] font-mono">
+              &copy; 2025 NICHE &amp; LEADS, INC. ALL RIGHTS RESERVED.
+            </p>
+            <a
+              href="https://linkedin.com/company/niche-leads"
+              class="text-[#a1a1aa] hover:text-[#fafafa] transition-colors"
+            >
+              <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
