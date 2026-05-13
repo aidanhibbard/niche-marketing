@@ -7,19 +7,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
-        darkMode: 'class',
+        darkMode: "class",
         theme: {
           extend: {
             colors: {
-              background: '#09090b',
-              foreground: '#fafafa',
-              muted: { DEFAULT: '#27272a', foreground: '#a1a1aa' },
-              border: '#27272a',
-              primary: { DEFAULT: '#fafafa', foreground: '#09090b' },
+              background: "#09090b",
+              foreground: "#fafafa",
+              muted: { DEFAULT: "#27272a", foreground: "#a1a1aa" },
+              border: "#27272a",
+              primary: { DEFAULT: "#fafafa", foreground: "#09090b" },
             },
           },
         },
-      }
+      };
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -34,7 +34,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: 'Inter', system-ui, sans-serif;
+        font-family: "Inter", system-ui, sans-serif;
         background: #09090b;
         color: #fafafa;
       }
@@ -171,98 +171,101 @@
     <script>
       // Scale the animation SVG to fit its container
       function scaleAnim() {
-        const scene = document.querySelector('.anim-scene')
-        const inner = document.querySelector('.anim-scale')
-        if (!scene || !inner) return
-        const s = Math.min(scene.offsetWidth / 900, scene.offsetHeight / 640)
-        inner.style.transform = 'scale(' + s + ')'
+        const scene = document.querySelector(".anim-scene");
+        const inner = document.querySelector(".anim-scale");
+        if (!scene || !inner) return;
+        const s = Math.min(scene.offsetWidth / 900, scene.offsetHeight / 640);
+        inner.style.transform = "scale(" + s + ")";
       }
-      window.addEventListener('resize', scaleAnim)
-      window.addEventListener('load', scaleAnim)
+      window.addEventListener("resize", scaleAnim);
+      window.addEventListener("load", scaleAnim);
 
       // Chat animation sequence
       function runChat() {
-        const box = document.getElementById('chat-anim')
-        if (!box) return
+        const box = document.getElementById("chat-anim");
+        if (!box) return;
         const msgs = [
           {
-            role: 'customer',
-            text: 'Hi, I need a plumber for a leaky faucet. Available this week?',
+            role: "customer",
+            text: "Hi, I need a plumber for a leaky faucet. Available this week?",
             delay: 800,
           },
-          { role: 'typing', delay: 1400 },
+          { role: "typing", delay: 1400 },
           {
-            role: 'bot',
+            role: "bot",
             text: "Hi! We'd love to help with that. Is this for your home or a commercial property?",
             delay: 1800,
           },
           {
-            role: 'customer',
+            role: "customer",
             text: "It's my home, kitchen faucet has been dripping for a few days.",
             delay: 3200,
           },
-          { role: 'typing', delay: 1200 },
+          { role: "typing", delay: 1200 },
           {
-            role: 'bot',
-            text: 'Got it — kitchen faucet drip. We have openings Tuesday and Thursday this week. Could I get your phone number so we can confirm a time?',
+            role: "bot",
+            text: "Got it — kitchen faucet drip. We have openings Tuesday and Thursday this week. Could I get your phone number so we can confirm a time?",
             delay: 2000,
           },
-          { role: 'customer', text: '(555) 867-5309', delay: 3000 },
-          { role: 'typing', delay: 1000 },
+          { role: "customer", text: "(555) 867-5309", delay: 3000 },
+          { role: "typing", delay: 1000 },
           {
-            role: 'bot',
+            role: "bot",
             text: "Perfect, thanks! We'll call you shortly to lock in your appointment. Talk soon!",
             delay: 1600,
           },
-        ]
-        let i = 0
+        ];
+        let i = 0;
         function next() {
-          if (i >= msgs.length) return
-          const m = msgs[i]
+          if (i >= msgs.length) return;
+          const m = msgs[i];
           setTimeout(() => {
             // Remove typing indicator if present
-            const typ = box.querySelector('.chat-typing-wrap')
-            if (typ) typ.remove()
-            if (m.role === 'typing') {
-              const d = document.createElement('div')
-              d.className = 'chat-typing-wrap self-start flex gap-1.5 px-4 py-3 chat-msg'
-              d.style.animationDelay = '0s'
-              d.innerHTML = '<div class="chat-typing"><span></span><span></span><span></span></div>'
-              box.appendChild(d)
-            } else {
-              const d = document.createElement('div')
-              const isCustomer = m.role === 'customer'
+            const typ = box.querySelector(".chat-typing-wrap");
+            if (typ) typ.remove();
+            if (m.role === "typing") {
+              const d = document.createElement("div");
               d.className =
-                'chat-msg max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ' +
+                "chat-typing-wrap self-start flex gap-1.5 px-4 py-3 chat-msg";
+              d.style.animationDelay = "0s";
+              d.innerHTML =
+                '<div class="chat-typing"><span></span><span></span><span></span></div>';
+              box.appendChild(d);
+            } else {
+              const d = document.createElement("div");
+              const isCustomer = m.role === "customer";
+              d.className =
+                "chat-msg max-w-[85%] rounded-2xl px-4 py-2.5 text-sm " +
                 (isCustomer
-                  ? 'self-end rounded-br-md bg-[#27272a] text-[#fafafa]'
-                  : 'self-start rounded-bl-md bg-[#18181b] border border-[#27272a] text-[#a1a1aa]')
-              d.style.animationDelay = '0s'
-              d.textContent = m.text
-              box.appendChild(d)
+                  ? "self-end rounded-br-md bg-[#27272a] text-[#fafafa]"
+                  : "self-start rounded-bl-md bg-[#18181b] border border-[#27272a] text-[#a1a1aa]");
+              d.style.animationDelay = "0s";
+              d.textContent = m.text;
+              box.appendChild(d);
             }
-            box.scrollTop = box.scrollHeight
-            i++
-            next()
-          }, m.delay)
+            box.scrollTop = box.scrollHeight;
+            i++;
+            next();
+          }, m.delay);
         }
-        next()
+        next();
       }
-      window.addEventListener('load', runChat)
+      window.addEventListener("load", runChat);
 
       function fillPrompt(btn) {
-        const ta = document.getElementById('hero-prompt')
+        const ta = document.getElementById("hero-prompt");
         if (ta) {
-          ta.value = btn.textContent.trim()
-          ta.focus()
+          ta.value = btn.textContent.trim();
+          ta.focus();
         }
       }
       function submitPrompt() {
-        const ta = document.getElementById('hero-prompt')
-        const text = ta?.value?.trim()
-        if (!text) return
+        const ta = document.getElementById("hero-prompt");
+        const text = ta?.value?.trim();
+        if (!text) return;
         window.location.href =
-          'https://app.nicheandleads.com/workflows/new?prompt=' + encodeURIComponent(text)
+          "https://app.nicheandleads.com/workflows/new?prompt=" +
+          encodeURIComponent(text);
       }
     </script>
   </head>
@@ -277,10 +280,18 @@
         >
           <div class="flex items-center gap-6 lg:gap-8">
             <a href="/" class="flex items-center gap-2">
-              <img src="animation-assets/favicon.ico" alt="Niche" class="h-8 w-8 rounded-md" />
-              <span class="text-sm font-semibold tracking-tight text-[#fafafa]">Niche</span>
+              <img
+                src="animation-assets/favicon.ico"
+                alt="Niche"
+                class="h-8 w-8 rounded-md"
+              />
+              <span class="text-sm font-semibold tracking-tight text-[#fafafa]"
+                >Niche</span
+              >
             </a>
-            <div class="hidden md:absolute md:left-1/2 md:flex md:-translate-x-1/2 md:gap-x-1">
+            <div
+              class="hidden md:absolute md:left-1/2 md:flex md:-translate-x-1/2 md:gap-x-1"
+            >
               <a
                 href="#features"
                 class="rounded-md px-3 py-1.5 text-sm font-medium text-[#a1a1aa] transition-colors hover:text-[#fafafa] hover:bg-[#27272a]/50"
@@ -321,12 +332,45 @@
                     Every Lead. Every Time.
                     <span class="text-[#a1a1aa]">Until It's Booked.</span>
                   </h1>
-                  <p class="mt-8 max-w-2xl mx-auto text-lg text-[#a1a1aa] leading-relaxed">
-                    Niche doesn't stop at the first reply. It follows up across calls, texts, and
-                    emails until the job is booked or the lead drops.
+                  <p
+                    class="mt-8 max-w-2xl mx-auto text-lg text-[#a1a1aa] leading-relaxed"
+                  >
+                    Niche doesn't stop at the first reply. It follows up across
+                    calls, texts, and emails until the job is booked or the lead
+                    drops.
                   </p>
+                  <div
+                    class="mt-12 flex flex-wrap justify-center gap-x-12 gap-y-4"
+                  >
+                    <div>
+                      <span class="text-2xl font-bold text-[#fafafa]"
+                        >&lt; 2 sec</span
+                      >
+                      <p class="text-xs text-[#a1a1aa] mt-1">Response time</p>
+                    </div>
+                    <div>
+                      <span class="text-2xl font-bold text-[#fafafa]">85%</span>
+                      <p class="text-xs text-[#a1a1aa] mt-1">Booking rate</p>
+                    </div>
+                    <div>
+                      <span class="text-2xl font-bold text-[#fafafa]"
+                        >$50M+</span
+                      >
+                      <p class="text-xs text-[#a1a1aa] mt-1">
+                        Revenue generated
+                      </p>
+                    </div>
+                    <div>
+                      <span class="text-2xl font-bold text-[#fafafa]"
+                        >24/7</span
+                      >
+                      <p class="text-xs text-[#a1a1aa] mt-1">No days off</p>
+                    </div>
+                  </div>
                   <div class="mt-10 max-w-xl mx-auto w-full">
-                    <div class="rounded-2xl border border-[#27272a] bg-[#18181b] p-4">
+                    <div
+                      class="rounded-2xl border border-[#27272a] bg-[#18181b] p-4"
+                    >
                       <textarea
                         id="hero-prompt"
                         placeholder="Describe your workflow..."
@@ -381,24 +425,6 @@
                       </button>
                     </div>
                   </div>
-                  <div class="mt-16 flex flex-wrap justify-center gap-x-12 gap-y-4">
-                    <div>
-                      <span class="text-2xl font-bold text-[#fafafa]">&lt; 2 sec</span>
-                      <p class="text-xs text-[#a1a1aa] mt-1">Response time</p>
-                    </div>
-                    <div>
-                      <span class="text-2xl font-bold text-[#fafafa]">85%</span>
-                      <p class="text-xs text-[#a1a1aa] mt-1">Booking rate</p>
-                    </div>
-                    <div>
-                      <span class="text-2xl font-bold text-[#fafafa]">$50M+</span>
-                      <p class="text-xs text-[#a1a1aa] mt-1">Revenue generated</p>
-                    </div>
-                    <div>
-                      <span class="text-2xl font-bold text-[#fafafa]">24/7</span>
-                      <p class="text-xs text-[#a1a1aa] mt-1">No days off</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -412,15 +438,20 @@
                   class="relative border-b border-[#27272a] lg:border-b-0 lg:border-r p-8 lg:p-12 flex flex-col justify-between"
                 >
                   <div>
-                    <h2 class="text-2xl font-semibold tracking-tight text-[#fafafa]">
+                    <h2
+                      class="text-2xl font-semibold tracking-tight text-[#fafafa]"
+                    >
                       Connects to everything.
                     </h2>
                     <p class="mt-2 text-sm text-[#a1a1aa] max-w-md">
-                      Leads flow in from Yelp, Google LSA, Thumbtack, and voice — straight to your
-                      CRMs and tools.
+                      Leads flow in from Yelp, Google LSA, Thumbtack, and voice
+                      — straight to your CRMs and tools.
                     </p>
                   </div>
-                  <div class="anim-scene mt-6 overflow-hidden" style="aspect-ratio: 900/640">
+                  <div
+                    class="anim-scene mt-6 overflow-hidden"
+                    style="aspect-ratio: 900/640"
+                  >
                     <div class="anim-scale">
                       <div class="anim-ambient"></div>
                       <svg
@@ -465,7 +496,10 @@
                         <img src="animation-assets/yelp-logo.png" alt="" />
                       </div>
                       <div class="anim-tile" style="left: 68px; top: 208px">
-                        <img src="animation-assets/google-lsa-logo.svg" alt="" />
+                        <img
+                          src="animation-assets/google-lsa-logo.svg"
+                          alt=""
+                        />
                       </div>
                       <div class="anim-tile" style="left: 68px; top: 348px">
                         <img src="animation-assets/thumbtack-logo.png" alt="" />
@@ -484,7 +518,9 @@
                           />
                         </svg>
                       </div>
-                      <div class="anim-hub"><img src="animation-assets/favicon.ico" alt="" /></div>
+                      <div class="anim-hub">
+                        <img src="animation-assets/favicon.ico" alt="" />
+                      </div>
                       <div class="anim-tile" style="right: 68px; top: 68px">
                         <img src="animation-assets/acculynx.avif" alt="" />
                       </div>
@@ -512,7 +548,10 @@
                         <img src="animation-assets/go-high-level.png" alt="" />
                       </div>
                       <div class="anim-tile" style="right: 68px; top: 488px">
-                        <img src="animation-assets/google-calendar-logo.png" alt="" />
+                        <img
+                          src="animation-assets/google-calendar-logo.png"
+                          alt=""
+                        />
                       </div>
                     </div>
                     <!-- end anim-scale -->
@@ -520,15 +559,20 @@
                 </div>
                 <div class="relative p-8 lg:p-12 bg-[#27272a]/30 flex flex-col">
                   <div class="mb-6">
-                    <h2 class="text-2xl font-semibold tracking-tight text-[#fafafa]">
+                    <h2
+                      class="text-2xl font-semibold tracking-tight text-[#fafafa]"
+                    >
                       Responds in under 2 seconds.
                     </h2>
                     <p class="mt-2 text-sm text-[#a1a1aa] max-w-md">
-                      Niche replies in the native chat instantly — so the conversation starts while
-                      the lead is still ready to book.
+                      Niche replies in the native chat instantly — so the
+                      conversation starts while the lead is still ready to book.
                     </p>
                   </div>
-                  <div id="chat-anim" class="flex-1 flex flex-col gap-3 overflow-hidden"></div>
+                  <div
+                    id="chat-anim"
+                    class="flex-1 flex flex-col gap-3 overflow-hidden"
+                  ></div>
                 </div>
               </div>
             </div>
@@ -537,7 +581,9 @@
           <!-- FEATURE GRID — 6 cards -->
           <section id="features" class="border-t border-[#27272a]">
             <div class="mx-auto max-w-7xl border-x border-[#27272a]">
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-[#27272a]">
+              <div
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-[#27272a]"
+              >
                 <div
                   class="relative bg-[#09090b] p-8 lg:p-10 min-h-[260px] flex flex-col justify-between"
                 >
@@ -559,12 +605,14 @@
                         />
                       </svg>
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]">
+                    <h3
+                      class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]"
+                    >
                       Multi-Channel Follow-Up
                     </h3>
                     <p class="mt-2 text-sm text-[#a1a1aa] leading-relaxed">
-                      Follows up across voice, SMS, and email — branching and retrying until the job
-                      is booked.
+                      Follows up across voice, SMS, and email — branching and
+                      retrying until the job is booked.
                     </p>
                   </div>
                   <div class="mt-6 flex flex-wrap gap-1.5">
@@ -603,12 +651,14 @@
                         />
                       </svg>
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]">
+                    <h3
+                      class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]"
+                    >
                       AI-Powered Workflows
                     </h3>
                     <p class="mt-2 text-sm text-[#a1a1aa] leading-relaxed">
-                      Describe what you want in plain English. Niche builds the automation —
-                      classify, route, schedule.
+                      Describe what you want in plain English. Niche builds the
+                      automation — classify, route, schedule.
                     </p>
                   </div>
                   <div class="mt-6">
@@ -639,12 +689,14 @@
                         />
                       </svg>
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]">
+                    <h3
+                      class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]"
+                    >
                       CRM &amp; Calendar Sync
                     </h3>
                     <p class="mt-2 text-sm text-[#a1a1aa] leading-relaxed">
-                      Every lead lands in your CRM automatically. Appointments sync to your
-                      calendar. You just show up.
+                      Every lead lands in your CRM automatically. Appointments
+                      sync to your calendar. You just show up.
                     </p>
                   </div>
                   <div class="mt-6 flex flex-wrap gap-1.5">
@@ -687,12 +739,14 @@
                         />
                       </svg>
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]">
+                    <h3
+                      class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]"
+                    >
                       Smart Lead Qualification
                     </h3>
                     <p class="mt-2 text-sm text-[#a1a1aa] leading-relaxed">
-                      AI classifies whether a lead matches your services. Out-of-scope requests get
-                      a polite decline.
+                      AI classifies whether a lead matches your services.
+                      Out-of-scope requests get a polite decline.
                     </p>
                   </div>
                   <div class="mt-6 flex flex-wrap gap-1.5">
@@ -731,11 +785,14 @@
                         />
                       </svg>
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]">
+                    <h3
+                      class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]"
+                    >
                       After-Hours Coverage
                     </h3>
                     <p class="mt-2 text-sm text-[#a1a1aa] leading-relaxed">
-                      Lead calls at 8 PM? Niche answers, texts, and books the job — while you sleep.
+                      Lead calls at 8 PM? Niche answers, texts, and books the
+                      job — while you sleep.
                     </p>
                   </div>
                   <div class="mt-6">
@@ -766,12 +823,14 @@
                         />
                       </svg>
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]">
+                    <h3
+                      class="mt-6 text-xl font-semibold tracking-tight text-[#fafafa]"
+                    >
                       Built for Service Businesses
                     </h3>
                     <p class="mt-2 text-sm text-[#a1a1aa] leading-relaxed">
-                      Plumbers, roofers, HVAC, electricians, pest control — purpose-built for the
-                      trades.
+                      Plumbers, roofers, HVAC, electricians, pest control —
+                      purpose-built for the trades.
                     </p>
                   </div>
                   <div class="mt-6 flex flex-wrap gap-1.5">
@@ -794,8 +853,12 @@
             <div
               class="mx-auto max-w-7xl border-x border-[#27272a] px-8 py-24 lg:px-12 lg:py-32 text-center"
             >
-              <h2 class="text-4xl lg:text-6xl font-bold tracking-tight text-balance text-[#fafafa]">
-                Stop losing jobs to<br /><span class="text-[#a1a1aa]">faster competitors.</span>
+              <h2
+                class="text-4xl lg:text-6xl font-bold tracking-tight text-balance text-[#fafafa]"
+              >
+                Stop losing jobs to<br /><span class="text-[#a1a1aa]"
+                  >faster competitors.</span
+                >
               </h2>
               <div class="mt-10 flex items-center justify-center gap-3">
                 <a
@@ -831,9 +894,15 @@
       <!-- FOOTER -->
       <footer class="border-t border-[#27272a] bg-[#09090b]">
         <div class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-          <div class="mx-auto grid max-w-3xl grid-cols-1 gap-8 text-center sm:grid-cols-3">
+          <div
+            class="mx-auto grid max-w-3xl grid-cols-1 gap-8 text-center sm:grid-cols-3"
+          >
             <div>
-              <h3 class="text-xs font-semibold uppercase tracking-wider text-[#a1a1aa]">Product</h3>
+              <h3
+                class="text-xs font-semibold uppercase tracking-wider text-[#a1a1aa]"
+              >
+                Product
+              </h3>
               <ul class="mt-4 space-y-3">
                 <li>
                   <a
@@ -852,7 +921,11 @@
               </ul>
             </div>
             <div>
-              <h3 class="text-xs font-semibold uppercase tracking-wider text-[#a1a1aa]">Company</h3>
+              <h3
+                class="text-xs font-semibold uppercase tracking-wider text-[#a1a1aa]"
+              >
+                Company
+              </h3>
               <ul class="mt-4 space-y-3">
                 <li>
                   <a
@@ -871,7 +944,11 @@
               </ul>
             </div>
             <div>
-              <h3 class="text-xs font-semibold uppercase tracking-wider text-[#a1a1aa]">Legal</h3>
+              <h3
+                class="text-xs font-semibold uppercase tracking-wider text-[#a1a1aa]"
+              >
+                Legal
+              </h3>
               <ul class="mt-4 space-y-3">
                 <li>
                   <a
